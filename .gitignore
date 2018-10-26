@@ -1,0 +1,10 @@
+# OS stuff
+.DS_Store
+.Spotlight-V100
+.Trashes
+Thumbs.db
+RECYCLE.BIN/
+
+# Project stuff
+node_modules/
+build/

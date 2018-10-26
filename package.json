@@ -1,0 +1,36 @@
+{
+  "name": "youtube-together",
+  "version": "1.0.0",
+  "description": "Watch YouTube together in a browser",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joranrood/youtube-together.git"
+  },
+  "keywords": [
+    "YouTube",
+    "Node",
+    "HTML5",
+    "API",
+    "synchronous"
+  ],
+  "author": {
+    "name": "Joran Rood",
+    "email": "joran@rood.me",
+    "url": "https://joran.rood.me"
+  },
+  "contributors": [
+    {
+      "name": "Murtada al Mousawy",
+      "email": "info@murtada.nl",
+      "url": "https://murtada.nl"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joranrood/youtube-together/issues"
+  },
+  "homepage": "https://github.com/joranrood/youtube-together#readme"
+}
