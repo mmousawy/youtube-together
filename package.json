@@ -32,5 +32,17 @@
   "bugs": {
     "url": "https://github.com/joranrood/youtube-together/issues"
   },
-  "homepage": "https://github.com/joranrood/youtube-together#readme"
+  "homepage": "https://github.com/joranrood/youtube-together#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-livereload": "^4.0.0",
+    "gulp-notify": "^3.2.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-uglify-es": "^1.0.4",
+    "gulp-webserver": "^0.9.1",
+    "path": "^0.12.7"
+  }
 }
