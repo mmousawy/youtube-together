@@ -11,14 +11,14 @@ const gulp        = require('gulp'),
 
 // Define config properties
 const config = {
-  source: `client/src/`,
-  destination: `client/build/`
+  source: `client/src`,
+  destination: `client/build`
 };
 
 // Copy all static files
 gulp.task('copy', () => {
 	return gulp.src([
-		`${config.source}**/*.html`
+		`${config.source}/**/*.html`
 	], {
 		base: config.source
 	})
@@ -28,7 +28,7 @@ gulp.task('copy', () => {
 
 // Compile SCSS to CSS
 gulp.task('compile-scss', () => {
-	return gulp.src(`${config.source}scss/base.scss`)
+	return gulp.src(`${config.source}/scss/base.scss`)
 	.pipe(concat('style.css'))
 	.pipe(scss({ outputStyle: 'compressed' }))
 	.on('error', notify.onError('SCSS compile error: <%= error.message %>'))
@@ -43,7 +43,7 @@ gulp.task('compile-scss', () => {
 
 // Uglify JS
 gulp.task('uglify-js', () => {
-	return gulp.src(`${config.source}js/script.js`)
+	return gulp.src(`${config.source}/js/script.js`)
   .pipe(uglify())
 	.on('error', notify.onError('JS uglify error: <%= error.message %>'))
 	.pipe(gulp.dest(`${config.destination}js`))
@@ -51,7 +51,7 @@ gulp.task('uglify-js', () => {
 });
 
 // Run webserver
-gulp.task('webserver', () => {
+gulp.task('webserver', ['copy', 'compile-scss', 'uglify-js'], () => {
   // Insert in HTML:
   // <script src="//<host>:<port>/livereload.js?host=<host>"></script>
   livereload.listen({
@@ -72,13 +72,13 @@ gulp.task('webserver', () => {
 // Watch the project for changes
 gulp.task('watch-project', () => {
   // HTML
-  gulp.watch(`${config.source}**/*.html`, ['copy']);
+  gulp.watch(`${config.source}/**/*.html`, ['copy']);
 
   // SCSS
-  gulp.watch(`${config.source}scss/**/*.scss`, ['compile-scss']);
+  gulp.watch(`${config.source}/scss/**/*.scss`, ['compile-scss']);
 
   // JS
-	gulp.watch(`${config.source}js/**/*.js`, ['uglify-js']);
+	gulp.watch(`${config.source}/js/**/*.js`, ['uglify-js']);
 });
 
 gulp.task('build', ['copy', 'compile-scss', 'uglify-js']);
