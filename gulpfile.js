@@ -37,7 +37,7 @@ gulp.task('compile-scss', () => {
 			'last 2 versions'
 		]
 	}))
-	.pipe(gulp.dest(`${config.destination}css`))
+	.pipe(gulp.dest(`${config.destination}/css`))
 	.pipe(livereload());
 });
 
@@ -46,7 +46,7 @@ gulp.task('uglify-js', () => {
 	return gulp.src(`${config.source}/js/script.js`)
   .pipe(uglify())
 	.on('error', notify.onError('JS uglify error: <%= error.message %>'))
-	.pipe(gulp.dest(`${config.destination}js`))
+	.pipe(gulp.dest(`${config.destination}/js`))
 	.pipe(livereload());
 });
 
