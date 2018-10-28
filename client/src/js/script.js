@@ -7,7 +7,7 @@ class HostController {
     });
 
     this.overlay = document.querySelector('.overlay');
-    this.roomcodeElement = document.querySelector('.room__code');
+    this.roomcodeElement = document.querySelector('.player__room-code');
   }
 
   initialise() {
@@ -27,7 +27,7 @@ class HostController {
       this.player.addEventListener('onStateChange', stateChangeCallback);
     });
 
-    this.socket.addEventListener('message', (event) => {
+    const messageCallback = (event) => {
       let error, message;
 
       try {
@@ -48,11 +48,14 @@ class HostController {
       if (message.header.action === 'leave') {
         if (message.body.status === 'success') {
           this.overlay.classList.remove('is-closed');
-          this.player.destroy();
           this.player.stopVideo();
+          this.player.destroy();
+          this.socket.removeEventListener('message', messageCallback);
         }
       }
-    });
+    };
+
+    this.socket.addEventListener('message', messageCallback);
   }
 }
 
@@ -63,7 +66,7 @@ class GuestController {
       videoId: 'Ep3Hnc7KZVo'
     });
     this.overlay = document.querySelector('.overlay');
-    this.roomcodeElement = document.querySelector('.room__code');
+    this.roomcodeElement = document.querySelector('.player__room-code');
   }
 
   initialise() {
@@ -89,8 +92,8 @@ class GuestController {
       if (message.header.action === 'leave') {
         if (message.body.status === 'success') {
           this.overlay.classList.remove('is-closed');
-          this.player.destroy();
           this.player.stopVideo();
+          this.player.destroy();
         }
       }
 

@@ -1,4 +1,4 @@
-.room {
+.player {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -8,14 +8,14 @@
 	padding: 1rem;
 }
 
-.room__header {
+.player__header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding-bottom: 1rem;
 }
 
-.room__code {
+.player__room-code {
 	color: lighten($cl-bg, 30%);
 	font-weight: bold;
 	font-size: 1.25rem;
