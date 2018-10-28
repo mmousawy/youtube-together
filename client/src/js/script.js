@@ -1,23 +1,57 @@
 class HostController {
   constructor(socket, player) {
     this.socket = socket;
-    this.player = player;
+
+    this.player = new YT.Player('player', {
+      videoId: 'Ep3Hnc7KZVo'
+    });
+
+    this.overlay = document.querySelector('.overlay');
+    this.roomcodeElement = document.querySelector('.room__code');
   }
 
   initialise() {
+    this.player.addEventListener('onReady', () => {
+      const stateChangeCallback = (event) => {
+        // Propagate state changes to the guests
+        this.socket.sendJSON({
+          header: {
+            action: 'stateChange'
+          },
+          body: {
+            state: event.data
+          }
+        });
+      };
+
+      this.player.addEventListener('onStateChange', stateChangeCallback);
+    });
+
     this.socket.addEventListener('message', (event) => {
       let error, message;
 
       try {
         message = JSON.parse(event.data);
+        console.log(message);
+
       } catch (error) {
         //
       }
-    });
 
-    this.player.addEventListener('onStateChange', (event) => {
-      // Propagate state changes to the guests
-      this.socket.send(JSON.stringify({}));
+      if (message.header.action === 'host') {
+        if (message.body.room_id) {
+          this.overlay.classList.add('is-closed');
+          this.roomcodeElement.textContent = message.body.room_id;
+        }
+      }
+
+      if (message.header.action === 'leave') {
+        if (message.body.status === 'success') {
+          this.overlay.classList.remove('is-closed');
+          this.player.destroy();
+          this.player.stopVideo();
+        }
+      }
     });
   }
 }
@@ -25,7 +59,11 @@ class HostController {
 class GuestController {
   constructor(socket, player) {
     this.socket = socket;
-    this.player = player;
+    this.player = new YT.Player('player', {
+      videoId: 'Ep3Hnc7KZVo'
+    });
+    this.overlay = document.querySelector('.overlay');
+    this.roomcodeElement = document.querySelector('.room__code');
   }
 
   initialise() {
@@ -34,15 +72,54 @@ class GuestController {
 
       try {
         message = JSON.parse(event.data);
+        console.log(message);
         // Mimic host state changes
 
       } catch (error) {
         //
       }
-    });
 
-    this.player.addEventListener('onStateChange', (event) => {
-      //
+      if (message.header.action === 'join') {
+        if (message.body.status === 'success') {
+          this.overlay.classList.add('is-closed');
+          this.roomcodeElement.textContent = message.body.room_id;
+        }
+      }
+
+      if (message.header.action === 'leave') {
+        if (message.body.status === 'success') {
+          this.overlay.classList.remove('is-closed');
+          this.player.destroy();
+          this.player.stopVideo();
+        }
+      }
+
+      if (message.header.action === 'stateChange') {
+        const playBackCallbacks = {
+          '-1': () => {
+            // Unstarted
+            this.player.playVideo();
+          },
+          '0': () => {
+            // Ended
+            this.player.stopVideo();
+          },
+          '1': () => {
+            // Playing
+            this.player.playVideo();
+          },
+          '2': () => {
+            // Paused
+            this.player.pauseVideo();
+          },
+          '3': () => {
+            // Buffering
+            this.player.pauseVideo();
+          },
+        };
+
+        playBackCallbacks[message.body.state]();
+      }
     });
   }
 }
@@ -56,16 +133,67 @@ class GuestController {
   /* Instantiate the YouTube Player and the controller
      once the iFrame API has been loaded */
   window.onYouTubeIframeAPIReady = () => {
-    const player = new YT.Player('player', {
-      width: 1280, // 16:
-      height: 720 // :9
+    let socket;
+
+    socket = new WebSocket('ws://127.0.0.1:8081');
+
+    // Wrapper function to send JSON encoded data
+    socket.sendJSON = rawPayload => socket.send(JSON.stringify(rawPayload));
+
+    socket.addEventListener('open', () => {
+      initialisePage();
     });
 
-    const socket = new WebSocket('ws://127.0.0.1:8081');
-    const controller = new HostController(socket, player);
-    // const controller = new GuestController(socket, player);
+    const initialisePage = () => {
+      let controller;
 
-    // TODO: Wait for the socket to be ready as well
-    player.addEventListener('onReady', () => controller.initialise());
+      // Page interaction
+      const button__host = document.querySelector('.button--host');
+      const button__join = document.querySelector('.button--join');
+      const button__leave = document.querySelector('.button--leave');
+      const input__roomCode = document.querySelector('.input--join');
+
+      // Host a room
+      button__host.addEventListener('click', event => {
+        controller = new HostController(socket, player);
+        controller.initialise();
+
+        controller.socket.sendJSON({
+          header: {
+            action: 'host'
+          }
+        });
+      });
+
+      // Join a room
+      button__join.addEventListener('click', event => {
+        const roomCode = input__roomCode.value;
+
+        if (roomCode.length < 7) {
+          return;
+        }
+
+        controller = new GuestController(socket, player);
+        controller.initialise();
+
+        controller.socket.sendJSON({
+          header: {
+            action: 'join'
+          },
+          body: {
+            room_id: roomCode
+          }
+        });
+      });
+
+      // Leave current room
+      button__leave.addEventListener('click', event => {
+        controller.socket.sendJSON({
+          header: {
+            action: 'leave'
+          }
+        });
+      });
+    };
   };
 })();

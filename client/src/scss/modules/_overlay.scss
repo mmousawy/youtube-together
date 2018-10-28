@@ -1,0 +1,58 @@
+.overlay {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	z-index: 10;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: $cl-bg;
+	background-image: radial-gradient(lighten($cl-bg, 10%), $cl-bg);
+	transition-property: transform, opacity, visibility;
+	transition-duration: 300ms;
+
+	h1 {
+		font-size: 3rem;
+	}
+
+	h2 {
+		margin-bottom: 3rem;
+	}
+
+	&.is-closed {
+		transform: scale(1.5);
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+}
+
+.overlay__button {
+	font-size: 2rem;
+	line-height: 2rem;
+
+	+ .overlay__button {
+		margin-left: 5rem;
+	}
+}
+
+.overlay__input {
+	width: 15rem;
+	margin-right: 1rem;
+	font-size: 2rem;
+	line-height: 2rem;
+}
+
+.overlay__button-separator {
+	font-size: 2rem;
+	margin: 1rem 0 1.35rem;
+	color: darken($cl-fg, 20%);
+}
+
+.overlay__join-holder {
+	display: flex;
+	align-items: center;
+}

@@ -12,12 +12,21 @@ const gulp        = require('gulp'),
 // Define config properties
 const config = {
   source: `client/src`,
-  destination: `client/build`
+	destination: `client/build`,
+	webserver: {
+		host: '127.0.0.1',
+		port: 8080
+	},
+	livereload: {
+		host: '127.0.0.1',
+		port: 35000
+	}
 };
 
 // Copy all static files
 gulp.task('copy', () => {
 	return gulp.src([
+		`${config.source}/assets/**/*.*`,
 		`${config.source}/**/*.html`
 	], {
 		base: config.source
@@ -50,19 +59,26 @@ gulp.task('uglify-js', () => {
 	.pipe(livereload());
 });
 
-// Run webserver
-gulp.task('webserver', ['copy', 'compile-scss', 'uglify-js'], () => {
+// Move JS
+gulp.task('move-js', () => {
+	return gulp.src(`${config.source}/js/script.js`)
+	.pipe(gulp.dest(`${config.destination}/js`))
+	.pipe(livereload());
+});
+
+// Run web and livereload servers
+gulp.task('servers', ['copy', 'compile-scss', 'uglify-js'], () => {
   // Insert in HTML:
   // <script src="//<host>:<port>/livereload.js?host=<host>"></script>
   livereload.listen({
-		host: '0.0.0.0',
-		port: 35000
+		host: config.livereload.host,
+		port: config.livereload.port
   });
 
 	return gulp.src(config.destination)
 	.pipe(webserver({
-    host: '0.0.0.0',
-    port: 8080,
+    host: config.webserver.host,
+		port: config.webserver.port,
 		livereload: false, // Disable built-in livereload since it's slow
 		directoryListing: false,
 		open: true
@@ -78,11 +94,11 @@ gulp.task('watch-project', () => {
   gulp.watch(`${config.source}/scss/**/*.scss`, ['compile-scss']);
 
   // JS
-	gulp.watch(`${config.source}/js/**/*.js`, ['uglify-js']);
+	gulp.watch(`${config.source}/js/**/*.js`, ['move-js']);
 });
 
 gulp.task('build', ['copy', 'compile-scss', 'uglify-js']);
 
-gulp.task('watch', ['copy', 'compile-scss', 'uglify-js', 'webserver', 'watch-project']);
+gulp.task('watch', ['copy', 'compile-scss', 'move-js', 'servers', 'watch-project']);
 
 gulp.task('default', ['build']);

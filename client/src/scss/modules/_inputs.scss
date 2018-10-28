@@ -1,0 +1,8 @@
+input[type='text'] {
+	appearance: none;
+  padding: .15em .4em .3em;
+	border: 1px solid darken($cl-fg, 50%);
+	border-radius: .125em;
+	background: lighten($cl-bg, 10%);
+	color: $cl-fg;
+}

@@ -1,0 +1,42 @@
+.room {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	max-width: $sz-max-width;
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+.room__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 1rem;
+}
+
+.room__code {
+	color: lighten($cl-bg, 30%);
+	font-weight: bold;
+	font-size: 1.25rem;
+
+	&:not(:empty) {
+		&::before {
+			content: 'Room code: ';
+		}
+	}
+}
+
+.player-holder {
+	position: relative;
+	width: 100%;
+	padding-top: 56.25%;
+
+	iframe {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+}

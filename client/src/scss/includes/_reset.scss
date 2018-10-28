@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	line-height: 1rem;
+}
+
+button,
+input {
+	line-height: inherit;
+	font-family: inherit;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
