@@ -1,16 +1,20 @@
 class HostController {
-  constructor(socket) {
+  constructor(socket, videoId) {
     this.socket = socket;
     this.playBackState = 0;
     this.isSeeking = false;
+    this.videoId = videoId;
 
     this.player = new YT.Player('player', {
-      videoId: 'Ep3Hnc7KZVo',
+      videoId: videoId,
       playerVars: {
         'autoplay': 0,
         'controls': 0,
         'rel' : 0,
         'fs' : 0
+      },
+      events: {
+        'onReady': this.initialise.bind(this)
       }
     });
 
@@ -23,9 +27,11 @@ class HostController {
     this.button__volume = document.querySelector('.controls__button--volume');
 
     this.overlay = document.querySelector('.overlay');
-    this.roomcodeElement = document.querySelector('.player__room-code');
+    this.roomCodeElement = document.querySelector('.player__room-code');
 
     this.trackPosition = this.seekbar__track.getBoundingClientRect();
+
+    this.button__play.classList.remove('is-hidden');
 
     window.controller = this;
   }
@@ -54,33 +60,43 @@ class HostController {
   }
 
   initialise() {
-    this.player.addEventListener('onReady', () => {
-      const stateChangeCallback = (event) => {
-        // Propagate state changes to the guests
-        this.socket.sendJSON({
-          header: {
-            action: 'stateChange'
-          },
-          body: {
-            state: event.data
-          }
-        });
+    this.videoDuration = this.player.getDuration();
+    this.overlay.classList.remove('is-loading');
 
-        if (event.data === 1) {
-          this.button__play.classList.add('controls__button--is-playing');
-          this.playBackState = 1;
-          this.timer = window.setInterval(this.updateTime.bind(this), 100);
-        } else {
-          this.button__play.classList.remove('controls__button--is-playing');
-          this.playBackState = 0;
-          window.clearInterval(this.timer);
-        }
-      };
+    this.updateTime(0);
 
-      this.videoDuration = this.player.getDuration();
-
-      this.player.addEventListener('onStateChange', stateChangeCallback);
+    this.socket.sendJSON({
+      header: {
+        action: 'host'
+      },
+      body: {
+        videoId: this.videoId
+      }
     });
+
+    const stateChangeCallback = (event) => {
+      // Propagate state changes to the guests
+      this.socket.sendJSON({
+        header: {
+          action: 'stateChange'
+        },
+        body: {
+          state: event.data
+        }
+      });
+
+      if (event.data === 1) {
+        this.button__play.classList.add('controls__button--is-playing');
+        this.playBackState = 1;
+        this.timer = window.setInterval(this.updateTime.bind(this), 100);
+      } else {
+        this.button__play.classList.remove('controls__button--is-playing');
+        this.playBackState = 0;
+        window.clearInterval(this.timer);
+      }
+    };
+
+    this.player.addEventListener('onStateChange', stateChangeCallback);
 
     const messageCallback = (event) => {
       let error, message;
@@ -94,8 +110,21 @@ class HostController {
       if (message.header.action === 'host') {
         if (message.body.room_id) {
           this.overlay.classList.add('is-closed');
-          this.roomcodeElement.textContent = message.body.room_id;
+          this.roomCodeElement.textContent = message.body.room_id;
         }
+      }
+
+      if (message.header.action === 'requestState') {
+        this.socket.sendJSON({
+          header: {
+            action: 'updateState'
+          },
+          body: {
+            guest: message.body.guest,
+            state: this.player.getPlayerState(),
+            time: this.player.getCurrentTime()
+          }
+        });
       }
 
       if (message.header.action === 'leave') {
@@ -104,6 +133,7 @@ class HostController {
           this.player.stopVideo();
           this.player.destroy();
           this.socket.removeEventListener('message', messageCallback);
+          clearInterval(this.timer);
           delete window.controller;
         }
       }
@@ -114,28 +144,115 @@ class HostController {
 }
 
 class GuestController {
-  constructor(socket) {
+  constructor(socket, roomCode) {
     this.socket = socket;
     this.playBackState = 0;
     this.isGuest = true;
+    this.roomCode = roomCode;
+
 
     this.player = new YT.Player('player', {
-      videoId: 'Ep3Hnc7KZVo',
       playerVars: {
         'autoplay': 0,
         'controls': 0,
         'rel' : 0,
         'fs' : 0
+      },
+      events: {
+        'onReady': this.initialise.bind(this)
       }
     });
 
+    this.seekbar = document.querySelector('.seekbar');
+    this.seekbar__track = document.querySelector('.seekbar__track');
+    this.seekbar__progress = document.querySelector('.seekbar__progress');
+    this.seekbar__thumb = document.querySelector('.seekbar__thumb');
+    this.controls__time = document.querySelector('.controls__time');
+    this.button__play = document.querySelector('.controls__button--play');
+    this.button__volume = document.querySelector('.controls__button--volume');
+    this.responseMessage = document.querySelector('.overlay__response-message');
+
     this.overlay = document.querySelector('.overlay');
-    this.roomcodeElement = document.querySelector('.player__room-code');
+    this.roomCodeElement = document.querySelector('.player__room-code');
+
+    this.button__play.classList.add('is-hidden');
+
+    this.trackPosition = this.seekbar__track.getBoundingClientRect();
 
     window.controller = this;
   }
 
+  updateTime() {
+    const time = this.player.getCurrentTime();
+    const ratio = (time / this.videoDuration);
+
+    this.seekbar__progress.style.width = (ratio * 100) + '%';
+    this.seekbar__thumb.style.left =
+      ratio * this.trackPosition.width +
+      this.seekbar__thumb.offsetWidth * .5 + 'px';
+
+    const seconds = Math.round(time);
+    const timeString =
+      (seconds < 60 ? '00' : (seconds < 600 ? '0' : '') +
+        Math.floor(seconds / 60)) +
+      ':' +
+      ((seconds % 60) < 10 ? '0' : '') + seconds % 60;
+
+    this.controls__time.textContent = timeString;
+  }
+
+  stateHandler(state) {
+    const playBackCallbacks = {
+      '-1': () => {
+        // Unstarted
+        this.player.playVideo();
+      },
+      '0': () => {
+        // Ended
+        this.player.stopVideo();
+      },
+      '1': () => {
+        // Playing
+        this.player.playVideo();
+      },
+      '2': () => {
+        // Paused
+        this.player.pauseVideo();
+      },
+      '3': () => {
+        // Buffering
+        this.player.pauseVideo();
+      },
+      '5': () => {
+        // Queued
+        this.player.stopVideo();
+      }
+    };
+
+    if (state === 1) {
+      this.timer = window.setInterval(this.updateTime.bind(this), 100);
+    } else {
+      window.clearInterval(this.timer);
+    }
+
+    playBackCallbacks[state]();
+  }
+
   initialise() {
+    this.overlay.classList.remove('is-loading');
+    this.videoDuration = this.player.getDuration();
+
+    this.updateTime(0);
+
+    this.socket.sendJSON({
+      header: {
+        action: 'join'
+      },
+      body: {
+        room_id: this.roomCode
+      }
+    });
+
     this.socket.addEventListener('message', (event) => {
       let error, message;
 
@@ -148,9 +265,19 @@ class GuestController {
       }
 
       if (message.header.action === 'join') {
-        if (message.body.status === 'success') {
+        if (message.body && message.body.status === 'success') {
           this.overlay.classList.add('is-closed');
-          this.roomcodeElement.textContent = message.body.room_id;
+          this.roomCodeElement.textContent = message.body.room_id;
+          this.player.loadVideoById({
+            videoId: message.body.videoId
+          });
+
+          this.videoDuration = this.player.getDuration();
+        } else {
+          // Room does not exist
+          this.responseMessage.textContent = 'Room does not exist';
+          this.player.destroy();
+          delete window.controller;
         }
       }
 
@@ -159,35 +286,18 @@ class GuestController {
           this.overlay.classList.remove('is-closed');
           this.player.stopVideo();
           this.player.destroy();
+          clearInterval(this.timer);
           delete window.controller;
         }
       }
 
-      if (message.header.action === 'stateChange') {
-        const playBackCallbacks = {
-          '-1': () => {
-            // Unstarted
-            this.player.playVideo();
-          },
-          '0': () => {
-            // Ended
-            this.player.stopVideo();
-          },
-          '1': () => {
-            // Playing
-            this.player.playVideo();
-          },
-          '2': () => {
-            // Paused
-            this.player.pauseVideo();
-          },
-          '3': () => {
-            // Buffering
-            this.player.pauseVideo();
-          },
-        };
+      if (message.header.action == 'updateState') {
+        this.player.seekTo(message.body.time, true);
+        this.stateHandler(message.body.state);
+      }
 
-        playBackCallbacks[message.body.state]();
+      if (message.header.action === 'stateChange') {
+        this.stateHandler(message.body.state);
       }
     });
   }
@@ -221,6 +331,10 @@ class GuestController {
       const button__join = document.querySelector('.button--join');
       const button__leave = document.querySelector('.button--leave');
       const input__roomCode = document.querySelector('.input--join');
+      const input__videoId = document.querySelector('.input--video-id');
+
+      const overlay__hostForm = document.querySelector('.overlay__host-form');
+      const overlay__joinForm = document.querySelector('.overlay__join-form');
 
       // Controls interaction
       const seekbar = document.querySelector('.seekbar');
@@ -229,6 +343,19 @@ class GuestController {
       const seekbar__thumb = document.querySelector('.seekbar__thumb');
       const button__play = document.querySelector('.controls__button--play');
       const button__volume = document.querySelector('.controls__button--volume');
+
+      const overlay = document.querySelector('.overlay');
+      const responseMessage = document.querySelector('.overlay__response-message');
+
+      overlay__hostForm.addEventListener('submit', event => {
+        event.preventDefault();
+        return false;
+      });
+
+      overlay__joinForm.addEventListener('submit', event => {
+        event.preventDefault();
+        return false;
+      });
 
       // Play/pause
       button__play.addEventListener('click', event => {
@@ -259,7 +386,7 @@ class GuestController {
 
         addEventListener('mousemove', updateSeekbar);
 
-        updateSeekbar();
+        updateSeekbar(event);
       });
 
       updateSeekbar = (event) => {
@@ -296,7 +423,17 @@ class GuestController {
           return;
         }
 
-        controller.player.seekTo(controller.seekPositionTime);
+        controller.player.seekTo(controller.seekPositionTime, true);
+
+        controller.socket.sendJSON({
+          header: {
+            action: 'updateState'
+          },
+          body: {
+            state: controller.player.getPlayerState(),
+            time: controller.seekPositionTime
+          }
+        })
 
         window.removeEventListener('mousemove', updateSeekbar);
 
@@ -305,39 +442,25 @@ class GuestController {
 
       // Host a room
       button__host.addEventListener('click', event => {
-        button__play.classList.remove('is-hidden');
+        overlay.classList.add('is-loading');
+        responseMessage.textContent = '';
+        const videoId = input__videoId.value;
 
-        controller = new HostController(socket, player);
-        controller.initialise();
-
-        controller.socket.sendJSON({
-          header: {
-            action: 'host'
-          }
-        });
+        controller = new HostController(socket, videoId);
       });
 
       // Join a room
       button__join.addEventListener('click', event => {
-        button__play.classList.add('is-hidden');
-
         const roomCode = input__roomCode.value;
 
-        if (roomCode.length < 7) {
+        if (roomCode.length < 7 || roomCode.length > 14) {
           return;
         }
 
-        controller = new GuestController(socket, player);
-        controller.initialise();
+        overlay.classList.add('is-loading');
 
-        controller.socket.sendJSON({
-          header: {
-            action: 'join'
-          },
-          body: {
-            room_id: roomCode
-          }
-        });
+        responseMessage.textContent = '';
+        controller = new GuestController(socket, roomCode);
       });
 
       // Leave current room

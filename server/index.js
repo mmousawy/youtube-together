@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const shortid = require('shortid');
 const RoomsController = require('./controllers/RoomsController.js');
 
 const WebSocketServer = new WebSocket.Server({
@@ -19,7 +20,8 @@ WebSocketServer.on('connection', function connection(client) {
 		}
 	}
 
-	client.metadata = {};
+  client.metadata = {};
+  client.metadata.id = shortid.generate();
 
 	// Handle client message events
 	client.on('message', function incoming(data) {

@@ -12,7 +12,7 @@ class RoomsController {
 			return;
 		}
 
-		const room = new Room(client);
+		const room = new Room(client, data.body.videoId);
 
 		this.rooms[room.id] = room;
 
@@ -38,14 +38,26 @@ class RoomsController {
 			return;
 		}
 
-		room.guests.push(client);
+    room.guests.push(client);
+
+    room.host.sendJSON(
+      {
+        header: {
+          action: 'requestState'
+        },
+        body: {
+          guest: client.metadata.id
+        }
+      }
+    );
 
 		client.metadata.room = room;
 		client.metadata.role = 'guest';
 
 		// Return success
 		return {
-			room_id: room.id,
+      room_id: room.id,
+      videoId: room.videoId,
 			status: 'success'
 		};
 	}
@@ -87,7 +99,45 @@ class RoomsController {
 		return {
 			status: 'success'
 		};
-	}
+  }
+
+  updateState(data, client)
+  {
+    const room = client.metadata.room;
+
+		if (!room) {
+			return;
+		}
+
+    if (data.body.guest) {
+      const targetGuest = room.guests.filter(guest => guest.metadata.id === data.body.guest)[0];
+
+      targetGuest.sendJSON(
+        {
+          header: {
+            action: 'updateState'
+          },
+          body: data.body
+        }
+      );
+    } else {
+      room.guests.forEach(guest => {
+        guest.sendJSON(
+          {
+            header: {
+              action: 'updateState'
+            },
+            body: data.body
+          }
+        );
+      })
+    }
+
+		// Return success
+		return {
+			status: 'success'
+		};
+  }
 
 	stateChange(data, client)
 	{

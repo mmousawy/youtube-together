@@ -11,12 +11,18 @@
   <div class="overlay">
     <h1>YouTube Together</h1>
     <h2>Watch YouTube together!</h2>
-    <button class="overlay__button button--host">Host</button>
-    <span class="overlay__button-separator">or</span>
+      <form class="overlay__host-form">
+        <input type="text" required minlength="11" maxlength="11" class="overlay__input input--video-id" placeholder="Video ID">
+        <button class="overlay__button button--host">Host</button>
+      </form>
+      <span class="overlay__button-separator">or</span>
     <div class="overlay__join-holder">
-      <input type="text" class="overlay__input input--join" placeholder="Room code">
-      <button class="overlay__button button--join">Join</button>
+      <form class="overlay__join-form">
+        <input type="text" required minlength="7" maxlength="14" class="overlay__input input--join" placeholder="Room code">
+        <button class="overlay__button button--join">Join</button>
+      </form>
     </div>
+    <div class="overlay__response-message"></div>
   </div>
   <main class="player">
     <div class="player__header">

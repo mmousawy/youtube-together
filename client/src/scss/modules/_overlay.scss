@@ -12,7 +12,11 @@
 	background: $cl-bg;
 	background-image: radial-gradient(lighten($cl-bg, 10%), $cl-bg);
 	transition-property: transform, opacity, visibility;
-	transition-duration: 300ms;
+  transition-duration: 300ms;
+
+  > * {
+    transition: opacity 200ms;
+  }
 
 	h1 {
 		font-size: 3rem;
@@ -27,7 +31,29 @@
 		opacity: 0;
 		visibility: hidden;
 		pointer-events: none;
-	}
+  }
+
+  &.is-loading {
+    pointer-events: none;
+
+    > * {
+      opacity: .25;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: calc(50% - .5rem);
+      height: calc(50% - .5rem);
+      width: 1rem;
+      height: 1rem;
+      background-image: url('../assets/img/circle.svg');
+      background-position: 50%;
+      background-size: 1rem;
+      background-repeat: no-repeat;
+      animation: loading 500ms ease-in-out infinite alternate-reverse;
+    }
+  }
 }
 
 .overlay__button {
@@ -55,4 +81,45 @@
 .overlay__join-holder {
 	display: flex;
 	align-items: center;
+}
+
+.button--video-id {
+  transition: opacity 200ms;
+}
+
+.input--video-id:not(:valid) {
+  + button {
+    opacity: 0.5;
+  }
+}
+
+.button--join {
+  transition: opacity 200ms;
+}
+
+.input--join:not(:valid) {
+  + button {
+    opacity: 0.5;
+  }
+}
+
+.overlay__response-message {
+  margin-top: 1rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 200ms;
+
+  &:not(:empty) {
+    max-height: 1rem;
+  }
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(2rem);
+  }
+
+  100% {
+    transform: translateX(-2rem);
+  }
 }

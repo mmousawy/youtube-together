@@ -1,12 +1,12 @@
 const shortid = require('shortid');
 
 class Room {
-	constructor(host)
+	constructor(host, videoId)
 	{
 		this.id = shortid.generate();
 		this.host = host;
 		this.guests = [];
-		this.videoId;
+		this.videoId = videoId;
 		this.state = 0;
 
 		console.log('New room created:', this.id);
