@@ -5,4 +5,8 @@ input[type='text'] {
 	border-radius: .125em;
 	background: lighten($cl-bg, 10%);
 	color: $cl-fg;
+
+  @include bp(small) {
+		padding: .05em .4em .125em;
+	}
 }

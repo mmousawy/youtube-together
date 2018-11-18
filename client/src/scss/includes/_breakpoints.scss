@@ -1,0 +1,49 @@
+@mixin bp($size) {
+	@if ($size == xx-small) {
+		@media (max-width: 22rem) {
+			@content;
+		}
+	}
+
+	@if ($size == xx-small-to-x-small) {
+		@media (min-width: 22rem) and (max-width: 34rem) {
+			@content;
+		}
+	}
+
+	@if ($size == xx-small-to-small) {
+		@media (min-width: 22rem) and (max-width: 62rem) {
+			@content;
+		}
+	}
+
+	@if ($size == x-small) {
+		@media (max-width: 34rem) {
+			@content;
+		}
+	}
+
+	@if ($size == x-small-to-small) {
+		@media (min-width: 34rem) and (max-width: 62rem) {
+			@content;
+		}
+	}
+
+	@if ($size == small) {
+		@media (max-width: 62rem) {
+			@content;
+		}
+	}
+
+	@if ($size == large) {
+		@media (min-width: 62rem) {
+			@content;
+		}
+	}
+
+	@if ($size == small-to-large) {
+		@media (max-width: 72rem) {
+			@content;
+		}
+	}
+}
