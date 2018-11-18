@@ -46,5 +46,8 @@
     "path": "^0.12.7",
     "shortid": "^2.2.13",
     "ws": "^6.1.0"
+  },
+  "devDependencies": {
+    "gulp-js-import": "^1.0.6"
   }
 }

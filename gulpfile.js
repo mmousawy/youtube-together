@@ -5,6 +5,7 @@ const gulp        = require('gulp'),
       scss        = require('gulp-sass'),
       autoPrefix  = require('gulp-autoprefixer'),
       uglify      = require('gulp-uglify-es').default,
+      jsImport    = require('gulp-js-import'),
       notify      = require('gulp-notify'),
       livereload  = require('gulp-livereload'),
       webserver   = require('gulp-webserver');
@@ -52,7 +53,8 @@ gulp.task('compile-scss', () => {
 
 // Uglify JS
 gulp.task('uglify-js', () => {
-	return gulp.src(`${config.source}/js/script.js`)
+  return gulp.src(`${config.source}/js/script.js`)
+  .pipe(jsImport({hideConsole: true}))
   .pipe(uglify())
 	.on('error', notify.onError('JS uglify error: <%= error.message %>'))
 	.pipe(gulp.dest(`${config.destination}/js`))
@@ -61,13 +63,14 @@ gulp.task('uglify-js', () => {
 
 // Move JS
 gulp.task('move-js', () => {
-	return gulp.src(`${config.source}/js/script.js`)
+  return gulp.src(`${config.source}/js/script.js`)
+  .pipe(jsImport({hideConsole: true}))
 	.pipe(gulp.dest(`${config.destination}/js`))
 	.pipe(livereload());
 });
 
 // Run web and livereload servers
-gulp.task('servers', ['copy', 'compile-scss', 'uglify-js'], () => {
+gulp.task('servers', ['copy'], () => {
   // Insert in HTML:
   // <script src="//<host>:<port>/livereload.js?host=<host>"></script>
   livereload.listen({
