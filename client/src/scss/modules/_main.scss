@@ -1,4 +1,31 @@
 body {
   background-color: $cl-bg;
   color: $cl-fg;
+
+  &.is-loading {
+    &::after {
+      content: '';
+      z-index: 11;
+      position: absolute;
+      top: calc(50% - 1rem);
+      left: calc(50% - 1rem);
+      width: 3rem;
+      height: 3rem;
+      background-image: url('../assets/img/loading.svg');
+      background-position: 50%;
+      background-size: 3rem;
+      background-repeat: no-repeat;
+      animation: loadingSpinner 1000ms linear infinite;
+    }
+  }
+}
+
+@keyframes loadingSpinner {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

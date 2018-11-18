@@ -2,10 +2,15 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	max-width: $sz-max-width;
+  max-width: $sz-max-width;
+  max-height: 100vh;
 	min-height: 100vh;
 	margin: 0 auto;
-	padding: 1rem;
+  padding: 1rem;
+
+  > * {
+    flex-shrink: 0;
+  }
 }
 
 .player__header {

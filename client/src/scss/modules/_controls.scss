@@ -51,7 +51,8 @@
 	width: 2.5rem;
 	height: 3rem;
 	margin: 0 1rem;
-	color: darken($cl-white, 20%);
+  color: darken($cl-white, 20%);
+  font-family: 'Roboto Mono', monospace;
 }
 
 .seekbar {
@@ -71,7 +72,13 @@
 		.seekbar__thumb {
 			transform: scale(1);
 		}
-	}
+  }
+
+  &.is-seeking {
+    .seekbar__progress {
+      background-color: $cl-primary;
+    }
+  }
 }
 
 .seekbar__track {
@@ -100,6 +107,6 @@
 	background-size: 1rem;
 	background-repeat: no-repeat;
 	transform: scale(.5);
-	transition: transform 200ms;
+  transition: transform 200ms;
 	cursor: pointer;
 }
