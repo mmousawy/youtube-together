@@ -1,4 +1,4 @@
-class GuestController {
+export default class GuestController {
   constructor(elements, socket, roomCode) {
     window.controller = this;
 

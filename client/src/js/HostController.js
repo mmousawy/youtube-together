@@ -1,4 +1,4 @@
-class HostController {
+export default class HostController {
   constructor(elements, socket, videoId) {
     // Bind self to window
     window.controller = this;
