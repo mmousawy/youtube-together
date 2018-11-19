@@ -29,6 +29,10 @@
 			content: 'Room code: ';
 		}
 	}
+
+  @include bp(small) {
+		font-size: 1rem;
+	}
 }
 
 .player__viewer-count {

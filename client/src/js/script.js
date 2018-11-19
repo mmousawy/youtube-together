@@ -1,7 +1,10 @@
+import HostController from './HostController.js';
+import GuestController from './GuestController.js';
+
 (function() {
   // Load the YouTube iFrame API
   const scriptNode = document.createElement('script');
-  scriptNode.src = 'http://www.youtube.com/iframe_api';
+  scriptNode.src = '//www.youtube.com/iframe_api';
   document.body.appendChild(scriptNode);
 
   window.addEventListener('load', () => {
@@ -92,7 +95,7 @@
         updateSeekbar(event);
       });
 
-      updateSeekbar = (event) => {
+      const updateSeekbar = (event) => {
         if (!event || !event.clientX) {
           return;
         }
@@ -183,7 +186,4 @@
       });
     };
   };
-
-  @import 'HostController.js';
-  @import 'GuestController.js';
 })();

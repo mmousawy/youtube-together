@@ -9,6 +9,7 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
+  padding: 1rem;
 	background: $cl-bg;
 	background-image: radial-gradient(lighten($cl-bg, 10%), $cl-bg);
 	transition-property: transform, opacity, visibility;
@@ -25,11 +26,19 @@
   }
 
 	h1 {
-		font-size: 3rem;
+    font-size: 3rem;
+
+    @include bp(small) {
+      font-size: 2rem;
+    }
 	}
 
 	h2 {
-		margin-bottom: 3rem;
+    margin-bottom: 3rem;
+
+    @include bp(small) {
+      font-size: 1.25rem;
+    }
 	}
 
 	&.is-closed {
@@ -66,22 +75,32 @@
 	font-size: 2rem;
 	line-height: 2rem;
 
-	+ .overlay__button {
-		margin-left: 5rem;
-	}
+  @include bp(small) {
+    font-size: 1rem;
+  }
 }
 
 .overlay__input {
 	width: 15rem;
 	margin-right: 1rem;
 	font-size: 2rem;
-	line-height: 2rem;
+  line-height: 2rem;
+
+  @include bp(small) {
+    width: 10rem;
+    font-size: 1rem;
+    margin-right: .75rem;
+  }
 }
 
 .overlay__button-separator {
 	font-size: 2rem;
 	margin: 1rem 0 1.35rem;
-	color: darken($cl-fg, 20%);
+  color: darken($cl-fg, 20%);
+
+  @include bp(small) {
+    font-size: 1.25rem;
+  }
 }
 
 .overlay__join-holder {
