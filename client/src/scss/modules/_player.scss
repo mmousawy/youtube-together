@@ -15,7 +15,6 @@
 
 .player__header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
 	padding-bottom: 1rem;
 }
@@ -28,6 +27,25 @@
 	&:not(:empty) {
 		&::before {
 			content: 'Room code: ';
+		}
+	}
+}
+
+.player__viewer-count {
+  display: flex;
+  margin-left: auto;
+  margin-right: 2rem;
+	color: lighten($cl-bg, 30%);
+	font-weight: bold;
+  font-size: 1.25rem;
+
+	&:not(:empty) {
+		&::before {
+      content: '';
+      width: 1em;
+      height: 1em;
+      margin-right: .5rem;
+      background-image: url('../assets/img/view.svg');
 		}
 	}
 }

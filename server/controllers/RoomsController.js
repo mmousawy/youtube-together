@@ -21,7 +21,8 @@ class RoomsController {
 
 		// Return the room ID
 		return {
-			room_id: room.id
+      room_id: room.id,
+      viewerCount: room.guests.length + 1
 		};
 	}
 
@@ -51,6 +52,30 @@ class RoomsController {
       }
     );
 
+    room.host.sendJSON(
+      {
+        header: {
+          action: 'updateViewerCount'
+        },
+        body: {
+          viewerCount: room.guests.length + 1
+        }
+      }
+    );
+
+    room.guests.forEach(guest => {
+      guest.sendJSON(
+        {
+          header: {
+            action: 'updateViewerCount'
+          },
+          body: {
+            viewerCount: room.guests.length + 1
+          }
+        }
+      );
+    });
+
 		client.metadata.room = room;
 		client.metadata.role = 'guest';
 
@@ -58,7 +83,8 @@ class RoomsController {
 		return {
       room_id: room.id,
       videoId: room.videoId,
-			status: 'success'
+      status: 'success',
+      viewerCount: room.guests.length + 1
 		};
 	}
 
@@ -89,7 +115,32 @@ class RoomsController {
 		} else {
 			// Remove guest client from room
 			room.guests = room.guests.filter(clientInRoom => clientInRoom !== client);
-		}
+    }
+
+    // Update viewer count for others
+    room.host.sendJSON(
+      {
+        header: {
+          action: 'updateViewerCount'
+        },
+        body: {
+          viewerCount: room.guests.length + 1
+        }
+      }
+    );
+
+    room.guests.forEach(guest => {
+      guest.sendJSON(
+        {
+          header: {
+            action: 'updateViewerCount'
+          },
+          body: {
+            viewerCount: room.guests.length + 1
+          }
+        }
+      );
+    });
 
 		// Remove reference to room for client
 		delete client.metadata.room;

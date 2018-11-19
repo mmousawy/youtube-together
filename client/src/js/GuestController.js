@@ -35,6 +35,7 @@ class GuestController {
         if (message.body && message.body.status === 'success') {
           this.elements.overlay.classList.add('is-closed');
           this.elements.player__roomCode.textContent = message.body.room_id;
+          this.elements.player__viewerCount.textContent = message.body.viewerCount;
 
           this.player = new YT.Player('player', {
             videoId: message.body.videoId,
@@ -51,8 +52,13 @@ class GuestController {
         } else {
           // Room does not exist
           this.elements.responseMessage.textContent = 'Room does not exist';
-          this.player.destroy();
           delete window.controller;
+        }
+      }
+
+      if (message.header.action === 'updateViewerCount') {
+        if (message.body.viewerCount) {
+          this.elements.player__viewerCount.textContent = message.body.viewerCount;
         }
       }
 

@@ -41,6 +41,7 @@
         seekbar__progress: document.querySelector('.seekbar__progress'),
         seekbar__thumb: document.querySelector('.seekbar__thumb'),
         // Controls
+        player__viewerCount: document.querySelector('.player__viewer-count'),
         player__roomCode: document.querySelector('.player__room-code'),
         button__play: document.querySelector('.controls__button--play'),
         button__volume: document.querySelector('.controls__button--volume'),

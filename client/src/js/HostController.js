@@ -118,6 +118,13 @@ class HostController {
         if (message.body.room_id) {
           this.elements.overlay.classList.add('is-closed');
           this.elements.player__roomCode.textContent = message.body.room_id;
+          this.elements.player__viewerCount.textContent = message.body.viewerCount;
+        }
+      }
+
+      if (message.header.action === 'updateViewerCount') {
+        if (message.body.viewerCount) {
+          this.elements.player__viewerCount.textContent = message.body.viewerCount;
         }
       }
 
